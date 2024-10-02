@@ -20,8 +20,8 @@ torch.cuda.manual_seed(0)
 np.random.seed(0)
 
 problem = "denoising" # "semi-blind deconvolution" "deconvolution" "denoising"
-training_Mode = "ISGD" #"ISGD" "MAID" "IAdam" "IASGD"
-opt_alg = 'ISGD'
+training_Mode = "MAID" #"ISGD" "MAID" "IAdam" "IASGD"
+opt_alg = 'MAID'
 
 channels = 3
 device = torch.device('cuda' if torch.cuda.is_available() else 'mps')
@@ -61,7 +61,7 @@ class Upper_Level(nn.Module):
 # Load data
 batch_size = 64
 noise_level = 25
-train_size = 512
+train_size = 25
 img_size_x, img_size_y = 96, 96
 budget = 3e5
 
@@ -94,8 +94,8 @@ else:
     #CenterCrop or Resize
     transform = transforms.Compose([transforms.Resize((img_size_x, img_size_y)), transforms.ToTensor()])
 dataset = CustomDataset("STL10", pytorch_dataset=True, transform=transform)
-test_size = 100
-test_dataset = Subset(dataset, range(train_size, train_size + test_size))
+# test_size = 100
+# test_dataset = Subset(dataset, range(train_size, train_size + test_size))
 # dataset = CustomDataset("BSDS300", pytorch_dataset=False, transform=transform)
 dataset = Subset(dataset, range(train_size))
 if training_Mode == "ISGD" or training_Mode == "IAdam" or training_Mode == "IASGD" or training_Mode == "SF_SGD":
@@ -115,8 +115,9 @@ for data in (noisy_loader):
     # init_loader.append(torch.zeros_like(data[0]))
     init_loader.append(data[0])
 # test data 
-# dataset_test = CustomDataset("STL10", pytorch_dataset=True, transform=transform, type= "test")
-# dataset_test = Subset(dataset_test, range(test_size))
+test_size = 50
+test_dataset = CustomDataset("STL10", pytorch_dataset=True, transform=transform, type= "test")
+test_dataset = Subset(test_dataset, range(test_size))
 test_loader = DataLoader(test_dataset, batch_size=test_size, shuffle = False)
 noisy_dataset_test = NoisyDataset(test_dataset, noise_level=noise_level, forward_operator = operator)
 noisy_loader_test = DataLoader(noisy_dataset_test, batch_size=test_size, shuffle = False)
@@ -150,12 +151,12 @@ hypergrad = Hypergrad_Calculator(lower_level, upper_level, x_init = x_init, verb
 test_hypergrad = Hypergrad_Calculator(lower_level, upper_level, x_init = x_init, verbose= False)
 print ("number of parameters: ", sum(p.numel() for p in hypergrad.parameters()), "number of mini-batches: ", len(dataloader))
 
-number_epochs = 100
+number_epochs = 1000
 number_batches = len(dataloader)
 eps0 = 1e1
 p = 0.0
 q = 0.0  # should be greater than 0.5 and less than 1
-alpha = 3e-4
+alpha = 1e-4
 setting= "poly-poly" # "constant" "poly-log" "poly-poly" "log-log"
 
 
@@ -444,7 +445,8 @@ def train_igd_maid_epoch(epoch, dataloader, noisy_loader, init_loader, hypergrad
         # Perform optimization step
         loss_val, init_loader[i] = optimizer.step()
         hypergrad.x_init = init_loader[i]
-
+        # hypergrad.lower_level_obj.regularizer.zero_mean()
+        hypergrad.lower_level_obj.regularizer.load_state_dict(optimizer.hypergrad.lower_level_obj.regularizer.state_dict())
         # Log PSNR and loss
         psnr_value = psnr_fn(data[0][0].unsqueeze(0), init_loader[i][0].unsqueeze(0).cpu()).item()
         print("PSNR: ", psnr_value, "Loss: ", loss_val.item())
@@ -456,11 +458,12 @@ def train_igd_maid_epoch(epoch, dataloader, noisy_loader, init_loader, hypergrad
         data[0].detach().cpu()
 
         # Optional: Visualization every 20 epochs
-        if epoch % 20 == 0:
-            plt.imshow(hypergrad.x_init[10].cpu().detach().permute(1, 2, 0).numpy())
-            plt.title(f"PSNR: {psnr_fn(data[0][10], hypergrad.x_init[10].cpu()).mean().item()}")
-            plt.show()
-
+        # if epoch % 20 == 0:
+        #     plt.imshow(hypergrad.x_init[10].cpu().detach().permute(1, 2, 0).numpy())
+        #     plt.title(f"PSNR: {psnr_fn(data[0][10], hypergrad.x_init[10].cpu()).mean().item()}")
+        #     plt.show()
+        init_test[0] = test_model(test_loader, noisy_loader_test, test_hypergrad, init_test[0], psnr_fn, device, logs_dict)
+        
         # Logging if optimizer step was successful
         if optimizer.state['successful']:
             logs_dict["loss_batch"].append(loss_val.item())
@@ -492,8 +495,8 @@ def test_model(test_loader, noisy_loader_test, hypergrad, init, psnr_fn, device 
         logs_dict["loss_test"].append(hypergrad.upper_level_obj(out).item())
         logs_dict["psnr_test"].append(psnr_fn(data[0], out.cpu()).mean().item())
         print("PSNR: ", psnr_fn(data[0], out.cpu()).mean().item())
-        plt.imshow(out[0].cpu().detach().permute(1, 2, 0).numpy())
-        plt.show()
+        # plt.imshow(out[0].cpu().detach().permute(1, 2, 0).numpy())
+        # plt.show()
         return out.clone().detach()
 
 def main_training_loop(training_mode, hypergrad, test_hypergrad, dataloader, noisy_loader, init_loader, test_loader, noisy_loader_test, device, psnr_fn, number_epochs, total_iter, alpha, eps0, setting, p, q, budget):
@@ -507,8 +510,8 @@ def main_training_loop(training_mode, hypergrad, test_hypergrad, dataloader, noi
             budget_control = train_igd_maid_epoch(epoch, dataloader, noisy_loader, init_loader, hypergrad, optimizer, logs_dict, psnr_fn, device, number_epochs, budget)
         else:
             budget_control = train_epoch(epoch, dataloader, noisy_loader, init_loader, hypergrad, optimizer, logs_dict, len(dataloader), psnr_fn, alpha, eps0, setting, p, q, total_iter, budget, device)
-        test_hypergrad.lower_level_obj.regularizer.load_state_dict(hypergrad.lower_level_obj.regularizer.state_dict())
-        init_test[0] = test_model(test_loader, noisy_loader_test, test_hypergrad, init_test[0], psnr_fn, device, logs_dict)
+            test_hypergrad.lower_level_obj.regularizer.load_state_dict(hypergrad.lower_level_obj.regularizer.state_dict())
+            init_test[0] = test_model(test_loader, noisy_loader_test, test_hypergrad, init_test[0], psnr_fn, device, logs_dict)
           
         if not budget_control:
             print("Budget exhausted")
