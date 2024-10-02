@@ -61,7 +61,7 @@ class Upper_Level(nn.Module):
 # Load data
 batch_size = 64
 noise_level = 25
-train_size = 25
+train_size = 250
 img_size_x, img_size_y = 96, 96
 budget = 3e5
 
@@ -156,173 +156,9 @@ number_batches = len(dataloader)
 eps0 = 1e1
 p = 0.0
 q = 0.0  # should be greater than 0.5 and less than 1
-alpha = 1e-4
+alpha = 2e-4
 setting= "poly-poly" # "constant" "poly-log" "poly-poly" "log-log"
 
-
-# optimizer = Bilevel_Optimizer(hypergrad = hypergrad, verbose = True, optimizer= 'SGD', lr = alpha).to(device)
-# logs_dict = {"loss_batch": [], "loss_epoch": [], "eps": [], "step": [], "lower_iter": [], "cg_iter": [],
-#              "psnr_batch" : [], "psnr_epoch" : [], "setting": setting, "p": p, "q": q, "train_mode": training_Mode}
-# # initialising the logs
-# for i, (data, noisy_data, init_data) in enumerate(zip(dataloader, noisy_loader, init_loader)):
-#     hypergrad = data_update(hypergrad, init_data.to(device), noisy_data[0].to(device), data[0].to(device))
-#     logs_dict["loss_batch"].append(hypergrad.upper_level_obj(hypergrad.x_init).item())
-# logs_dict["loss_epoch"].append(torch.mean(torch.tensor(logs_dict["loss_batch"])))
-# logs_dict["psnr_epoch"].append(psnr(data[0], init_loader[i].cpu()).mean().item())
-# logs_dict["eps"].append(eps0)
-# logs_dict["step"].append(alpha)
-# logs_dict["lower_iter"].append(hypergrad.logs["lower_counter"])
-# logs_dict["cg_iter"].append(hypergrad.logs["cg_counter"])
-# loss_batch = []
-# psnr_batch = []
-# directory = os.getcwd()
-# if training_Mode == "ISGD" or training_Mode == "IAdam" or training_Mode == "IASGD" or training_Mode == "SF_SGD":
-#     if training_Mode == "SF_SGD":
-#         hypergrad.train()
-#         optimizer.optimizer.train()
-#     for epoch in range(number_epochs):
-#         progress_bar = tqdm(enumerate(zip(dataloader, noisy_loader, init_loader)), total = len(dataloader), desc = f"Epoch {epoch}/{number_epochs}")
-#         # init_loader = DataLoader(ReplaceableDataset(init_loader.dataset), batch_size=32, shuffle = False)
-#         for i, (data, noisy_data, init_data) in progress_bar:
-#             hypergrad = data_update(hypergrad, init_data.to(device), noisy_data[0].to(device), data[0].to(device))
-#             optimizer.hypergrad = hypergrad
-#             optimizer.step()
-#             # hypergrad.lower_level_obj.regularizer.zero_mean()
-#             # updating the initalisation
-#             # init_loader[i] = hypergrad.FISTA(hypergrad.x_init, hypergrad.lower_tol, hypergrad.max_lower_iter)
-#             init_loader[i] = hypergrad.x_init.detach().cpu().clamp(0, 1)
-#             if setting == "poly-poly":
-#                 # print(total_iter(i, epoch, number_batches) + 1)
-#                 optimizer.lr = alpha * (total_iter(i, epoch, number_batches) + 1)**(-q)
-#                 hypergrad.lower_tol = eps0 * (total_iter(i, epoch, number_batches) + 1)**(-p)
-#             elif setting == "poly-log":
-#                 optimizer.lr = alpha * (total_iter(i, epoch, number_batches) + 1)**(-q)
-#                 if i == 0:
-#                     hypergrad.lower_tol = eps0
-#                 else:
-#                     hypergrad.lower_tol = eps0 * (torch.log(total_iter(i, epoch, number_batches) + 1))**(-p)
-#             elif setting == "log-log":
-#                 if i == 0:
-#                     optimizer.lr = alpha
-#                     hypergrad.lower_tol = eps0
-#                 else:
-#                     optimizer.lr = alpha * (torch.log(total_iter(i, epoch, number_batches) + 1))**(-q)
-#                     hypergrad.lower_tol = eps0 * (torch.log(total_iter(i, epoch, number_batches) + 1))**(-p) 
-#             elif setting == "constant":
-#                 optimizer.lr = alpha
-#                 hypergrad.lower_tol = eps0       
-#             print("PSNR: ", psnr(data[0][0].unsqueeze(0), init_loader[i][0].unsqueeze(0).cpu()).item())
-#             # plt.imshow(hypergrad.x_init[0].cpu().detach().permute(1, 2, 0).numpy())
-#             # plt.show()
-#             # logging
-#             if hypergrad.upper_level_obj(hypergrad.x_init) is None or torch.isnan(hypergrad.upper_level_obj(hypergrad.x_init)) or torch.isinf(hypergrad.upper_level_obj(hypergrad.x_init)):
-#                 print("Loss is nan or inf")
-#                 break
-#             logs_dict["loss_batch"].append(hypergrad.upper_level_obj(hypergrad.x_init).item())
-#             loss_batch.append(logs_dict["loss_batch"][-1])
-#             psnr_batch.append(psnr(data[0], init_loader[i].cpu()).mean().item())
-#             logs_dict["eps"].append(hypergrad.lower_tol)
-#             logs_dict["step"].append(optimizer.lr)
-#             logs_dict["psnr_batch"].append(psnr_batch[-1])
-#             if hypergrad.logs["lower_counter"] + hypergrad.logs["cg_counter"] > budget:
-#                 print("Budget exhausted")
-#                 break
-            
-#         # test
-#         for i, (data, noisy_data) in enumerate(zip(test_loader, noisy_loader_test)):
-#             init_test = torch.zeros_like(data[0])
-#             hypergrad = data_update(hypergrad, init_test.to(device), noisy_data[0].to(device), data[0].to(device))
-#             out = hypergrad.FISTA(hypergrad.x_init, 1e-3, hypergrad.max_lower_iter)
-#             print("PSNR: ", psnr(data[0][0], out[0].cpu()).mean().item())
-#         logs_dict["psnr_epoch"].append(torch.mean(torch.tensor(logs_dict["psnr_batch"])))
-#         logs_dict["lower_iter"].append(hypergrad.logs["lower_counter"])
-#         logs_dict["cg_iter"].append(hypergrad.logs["cg_counter"])            
-#         # plt.imshow(hypergrad.x_init[0].cpu().detach().numpy().squeeze(), cmap = "gray")
-#         # plt.show()
-#         logs_dict["loss_epoch"].append(torch.mean(torch.tensor(loss_batch)))
-#         loss_batch = []
-#         psnr_batch = []
-#         torch.save(logs_dict, directory + f'/Logs/logs_dict_{eps0}_{alpha}_{setting}_{p}_{q}.pt')
-#         if setting == "constant":
-#             torch.save(hypergrad.lower_level_obj.regularizer.state_dict(), directory + f'/Logs/regularizer_{eps0}_{alpha}_{setting}_{opt_alg}.pt')
-#         else:
-#             torch.save(hypergrad.lower_level_obj.regularizer.state_dict(), directory + f'/Logs/regularizer_{eps0}_{alpha}_{setting}_{p}_{q}_{opt_alg}.pt')
-        
-#         # early stopping due to maximum budget
-#         if hypergrad.logs["lower_counter"] + hypergrad.logs["cg_counter"] > budget:
-#             print("Budget exhausted")
-#             break
-# elif training_Mode == "MAID" or training_Mode == "IGD":
-#     hypergrad.verbose = False
-#     hypergrad.warm_start = False
-#     optimizer = MAID(hypergrad.lower_level_obj.regularizer.parameters(), lr = alpha, hypergrad_module = hypergrad, eps = eps0)
-#     if training_Mode == "IGD":
-#         optimizer.fixed_eps = True
-#         optimizer.fixed_lr = True
-#     # MAID full batch training
-#     for epoch in range(number_epochs):
-#         progress_bar = tqdm(enumerate(zip(dataloader, noisy_loader, init_loader)), total = len(dataloader), desc = f"Epoch {epoch}/{number_epochs}")
-#         for i, (data, noisy_data, init_data) in progress_bar:
-#             hypergrad = data_update(hypergrad, init_data.to(device), noisy_data[0].to(device), data[0].to(device))
-#             optimizer.hypergrad = hypergrad
-#             optimizer.zero_grad()
-#             optimizer.hypergrad.hypergrad()
-#             hypergrad.lower_skip = True
-#             loss_val, init_loader[i] = optimizer.step()
-#             hypergrad.x_init = init_loader[i]
-#             # hypergrad.lower_level_obj.regularizer.zero_mean()
-#             # updating the initalisation
-#             # if optimizer.state['successful']:
-#             #     hypergrad.x_init = init_loader[i]
-#             # else:
-#             #     init_loader[i] = optimizer.hypergrad.x_init.detach().cpu().clamp(0, 1)
-#             print("PSNR: ", psnr(data[0][0].unsqueeze(0), init_loader[i][0].unsqueeze(0).cpu()).item(), "loss: ", loss_val.item())
-#             hypergrad.x_init.detach().cpu()
-#             init_data.detach().cpu()
-#             noisy_data[0].detach().cpu()
-#             data[0].detach().cpu()
-            
-#             if epoch % 99 == 0:
-#                 plt.imshow(hypergrad.x_init[10].cpu().detach().permute(1, 2, 0).numpy())
-#                 plt.title("PSNR: " + str(psnr(data[0][10], hypergrad.x_init[10].cpu()).mean().item()))
-#                 plt.show()
-#                 # test image
-                
-#                 # hypergrad.lower_level_obj.measurement = measurement
-#                 # out = hypergrad.FISTA(init_test, hypergrad.lower_tol, 200)
-#                 # plt.imshow(out[0].cpu().detach().permute(1, 2, 0).numpy())
-#                 # plt.title("PSNR: " + str(psnr(test_image[0], out[0]).mean().item()))
-#                 # plt.show()
-#                 # measurement = out
-#                 # plot kernel
-#                 # plt.imshow(hypergrad.lower_level_obj.A.kernel[0].cpu().detach().numpy().squeeze())
-#                 # plt.colorbar()
-#                 # plt.show()
-#             # logging
-#             if optimizer.state['successful']:
-#                 logs_dict["loss_batch"].append(loss_val.item())
-#                 loss_batch.append(logs_dict["loss_batch"][-1])
-#                 logs_dict["eps"].append(hypergrad.lower_tol)
-#                 logs_dict["step"].append(optimizer.lr)
-#                 logs_dict["lower_iter"].append(hypergrad.logs["lower_counter"])
-#                 logs_dict["cg_iter"].append(hypergrad.logs["cg_counter"])
-#                 logs_dict["psnr_epoch"].append(psnr(data[0], init_loader[i].cpu()).mean().item())
-#         logs_dict["loss_epoch"] = logs_dict["loss_batch"]
-#         torch.save(logs_dict, directory + f'/Logs/logs_dict_{eps0}_{alpha}_{opt_alg}_2.pt')
-#         torch.save(hypergrad.lower_level_obj.regularizer.state_dict(), directory + f'/Logs/regularizer_{eps0}_{alpha}_{opt_alg}_2.pt')
-#         # early stopping due to maximum budget
-#         print("cost: ", hypergrad.logs["lower_counter"] + hypergrad.logs["cg_counter"])
-#         if hypergrad.logs["lower_counter"] + hypergrad.logs["cg_counter"] > budget:
-#             print("Budget exhausted")
-#             if not optimizer.state['successful']:
-#                 logs_dict["loss_batch"].append(loss_val.item())
-#                 loss_batch.append(logs_dict["loss_batch"][-1])
-#                 logs_dict["eps"].append(hypergrad.lower_tol)
-#                 logs_dict["step"].append(optimizer.lr)
-#                 logs_dict["lower_iter"].append(hypergrad.logs["lower_counter"])
-#                 logs_dict["cg_iter"].append(hypergrad.logs["cg_counter"])
-#                 logs_dict["psnr_epoch"].append(psnr(data[0], init_loader[i].cpu()).mean().item())
-#             break
 
 def initialize_optimizer(hypergrad, device, alpha, training_mode, optimizer_type='SGD'):
     if training_mode in ["MAID", "IGD"]:
@@ -377,8 +213,6 @@ def update_lr_tol(setting, optimizer, hypergrad, total_iter, i, epoch, num_batch
         hypergrad.lower_tol = eps0
 
 def log_metrics(logs_dict, hypergrad, optimizer, data, psnr_fn, init_loader, loss_batch, psnr_batch, i, epoch, directory):
-    logs_dict["loss_batch"].append(hypergrad.upper_level_obj(hypergrad.x_init).item())
-    loss_batch.append(logs_dict["loss_batch"][-1])
     psnr_batch.append(psnr_fn(data, init_loader[i].cpu()).mean().item())
     logs_dict["eps"].append(hypergrad.lower_tol)
     logs_dict["step"].append(optimizer.lr)
@@ -406,14 +240,15 @@ def train_epoch(epoch, dataloader, noisy_loader, init_loader, hypergrad, optimiz
         hypergrad = update_data(hypergrad, init_data, noisy_data[0], data[0], device)
         optimizer.hypergrad = hypergrad
         optimizer.step()
-        # hypergrad.lower_level_obj.regularizer.zero_mean()
+        hypergrad.lower_level_obj.regularizer.zero_mean()
         init_loader[i] = hypergrad.x_init.detach().cpu().clamp(0, 1)
         update_lr_tol(setting, optimizer, hypergrad, total_iter, i, epoch, number_batches, alpha, eps0, p, q)
 
         if hypergrad.upper_level_obj(hypergrad.x_init) is None or torch.isnan(hypergrad.upper_level_obj(hypergrad.x_init)):
             print("Loss is nan or inf")
             break
-
+        logs_dict["loss_batch"].append(hypergrad.upper_level_obj(hypergrad.x_init).item())
+        loss_batch.append(logs_dict["loss_batch"][-1])
         log_metrics(logs_dict, hypergrad, optimizer, data[0], psnr_fn, init_loader, loss_batch, psnr_batch, i, epoch, directory)
         if hypergrad.logs["lower_counter"] + hypergrad.logs["cg_counter"] > budget:
             logs_dict["psnr_epoch"].append(torch.mean(torch.tensor(psnr_batch)))
@@ -462,6 +297,7 @@ def train_igd_maid_epoch(epoch, dataloader, noisy_loader, init_loader, hypergrad
         #     plt.imshow(hypergrad.x_init[10].cpu().detach().permute(1, 2, 0).numpy())
         #     plt.title(f"PSNR: {psnr_fn(data[0][10], hypergrad.x_init[10].cpu()).mean().item()}")
         #     plt.show()
+        test_hypergrad.lower_level_obj.regularizer.load_state_dict(hypergrad.lower_level_obj.regularizer.state_dict())
         init_test[0] = test_model(test_loader, noisy_loader_test, test_hypergrad, init_test[0], psnr_fn, device, logs_dict)
         
         # Logging if optimizer step was successful
@@ -473,21 +309,30 @@ def train_igd_maid_epoch(epoch, dataloader, noisy_loader, init_loader, hypergrad
             logs_dict["lower_iter"].append(hypergrad.logs["lower_counter"])
             logs_dict["cg_iter"].append(hypergrad.logs["cg_counter"])
             logs_dict["psnr_epoch"].append(psnr_fn(data[0], init_loader[i].cpu()).mean().item())
-
+            logs_dict["loss_batch"].append(loss_val.item())
+            loss_batch.append(logs_dict["loss_batch"][-1])
         # Check if budget is exhausted
         if hypergrad.logs["lower_counter"] + hypergrad.logs["cg_counter"] > budget:
+            # Save logs and regularizer state
+            if not optimizer.state['successful']:
+                logs_dict["loss_batch"].append(logs_dict["loss_batch"][-1])
+                loss_batch.append(logs_dict["loss_batch"][-1])
+                logs_dict["eps"].append(logs_dict["eps"][-1])
+                logs_dict["step"].append(optimizer.lr)
+                logs_dict["lower_iter"].append(hypergrad.logs["lower_counter"])
+                logs_dict["cg_iter"].append(hypergrad.logs["cg_counter"])
+                logs_dict["psnr_epoch"].append(psnr_fn(data[0], init_loader[i].cpu()).mean().item())
             print("Budget exhausted")
             return False  # Stop training
 
     logs_dict["loss_epoch"] = logs_dict["loss_batch"]
-    torch.save(logs_dict, directory + f'/Logs/logs_dict_{eps0}_{alpha}_{opt_alg}_2.pt')
-    torch.save(hypergrad.lower_level_obj.regularizer.state_dict(), directory + f'/Logs/regularizer_{eps0}_{alpha}_{opt_alg}_2.pt')
+    torch.save(logs_dict, directory + f'/Logs/logs_dict_{eps0}_{alpha}_{opt_alg}.pt')
+    torch.save(hypergrad.lower_level_obj.regularizer.state_dict(), directory + f'/Logs/regularizer_{eps0}_{alpha}_{opt_alg}.pt')
 
     return True  # Continue training
 def test_model(test_loader, noisy_loader_test, hypergrad, init, psnr_fn, device ,logs_dict):        
     for i, (data, noisy_data) in enumerate(zip(test_loader, noisy_loader_test)):
         init_test = init.clone().detach().to(device)
-        # init_test = noisy_data[0].clone().detach()
         # hypergrad.warm_start = False
         # hypergrad.lower_skip = False
         hypergrad = update_data(hypergrad, init_test, noisy_data[0], data[0], device)
@@ -495,6 +340,7 @@ def test_model(test_loader, noisy_loader_test, hypergrad, init, psnr_fn, device 
         logs_dict["loss_test"].append(hypergrad.upper_level_obj(out).item())
         logs_dict["psnr_test"].append(psnr_fn(data[0], out.cpu()).mean().item())
         print("PSNR: ", psnr_fn(data[0], out.cpu()).mean().item())
+        # optional: visualization
         # plt.imshow(out[0].cpu().detach().permute(1, 2, 0).numpy())
         # plt.show()
         return out.clone().detach()
