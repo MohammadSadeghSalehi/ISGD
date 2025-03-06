@@ -43,3 +43,17 @@ This repository implements the proposed inexact stochastic bilevel optimization 
 ```bash
 git clone https://github.com/MohammadSadeghSalehi/Inexact-Bilevel-Optimization.git
 cd Inexact-Bilevel-Optimization
+
+
+#
+**How to cite**
+
+    @misc{salehi2024bilevellearninginexactstochastic,
+      title={Bilevel Learning with Inexact Stochastic Gradients}, 
+      author={Mohammad Sadegh Salehi and Subhadip Mukherjee and Lindon Roberts and Matthias J. Ehrhardt},
+      year={2024},
+      eprint={2412.12049},
+      archivePrefix={arXiv},
+      primaryClass={math.OC},
+      url={https://arxiv.org/abs/2412.12049}, 
+}
