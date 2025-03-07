@@ -57,10 +57,9 @@ cd SMAID
 ## Usage
 
  **Running the main script:**
-
-    ```bash
-    python train.py
-    ```
+```bash
+python train.py
+```
     
     * By default, the script uses the implicit function theorem-based bilevel optimization setting. 
 2.  **Modifying parameters:**
