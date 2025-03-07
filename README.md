@@ -31,8 +31,11 @@ This repository implements the proposed inexact stochastic bilevel optimization 
 
 ### **Key highlights of our approach:**  
 ✅ Inexact stochastic hypergradients for improved efficiency  
+
 ✅ Theoretical connection to the state-of-the-art analysis of biased SGD
+
 ✅ Theoretical convergence guarantees  
+
 ✅ Faster training and better generalization than deterministic bilevel methods  
 
 ---
@@ -82,13 +85,14 @@ cd SMAID
 ## Results
 
 ## Denoising training checkpoints
-<img src="Results/ADP.png" alt="Deblurred image result" width="1000">
+<img src="Result/training_cp.png" alt="Deblurred image result" width="1000">
 
 ## Deblurring Test image
+<img src="Result/deblur.png" alt="Deblurred image result" width="1000">
 
 ## Perfomance comparison 
-<img src="Results/curve.png" alt="Deblurred image result" width="800">
-Comparison of Inexact Stochastic Gradient Descent (ISGD) with fixed and decreasing step size, with Method of Adaptive Inexact Descent (MAID)
+<img src="Result/performance.png" alt="Deblurred image result" width="800">
+Comparison of Inexact Stochastic Gradient Descent (ISGD) with fixed and decreasing step sizes to the Method of Adaptive Inexact Descent (MAID).
 #
 **How to cite**
 
