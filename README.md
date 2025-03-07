@@ -48,7 +48,7 @@ git clone git@github.com:MohammadSadeghSalehi/SMAID.git
 cd SMAID
 ```
 
-2.  Install the necessary dependencies:
+ - Install the necessary dependencies:
 
     ```bash
     pip install numpy matplotlib scikit-learn torch torchvision tqdm deepinv
@@ -61,7 +61,8 @@ cd SMAID
     ```bash
     python train.py
     ```
-    By default, the script uses the implicit function theorem-based bilevel optimization setting. 
+    
+    * By default, the script uses the implicit function theorem-based bilevel optimization setting. 
 2.  **Modifying parameters:**
 
     * The `train.py` script contains parameters that can be adjusted to control the optimization process. These include:
@@ -77,9 +78,9 @@ cd SMAID
 
     * Adjust these parameters within the `train.py` file to experiment with different settings.
 
-3.  **Input Images:**
+  **Input Images:**
     * The Oxford-Pet dataset and STL-10 are used and will be downloaded automatically by the data loader.
-4.  **Output images:**
+  **Output images:**
     * The checkpoint training and test images will be saved automatically.
 
 ## Results
