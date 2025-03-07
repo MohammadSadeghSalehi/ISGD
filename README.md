@@ -61,7 +61,8 @@ cd SMAID
 python train.py
 ```
     
-    * By default, the script uses the implicit function theorem-based bilevel optimization setting. 
+   
+   * By default, the script uses the implicit function theorem-based bilevel optimization setting. 
 2.  **Modifying parameters:**
 
     * The `train.py` script contains parameters that can be adjusted to control the optimization process. These include:
