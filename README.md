@@ -78,9 +78,10 @@ cd SMAID
 
     * Adjust these parameters within the `train.py` file to experiment with different settings.
 
-  **Input Images:**
+ -  **Input Images:**
     * The Oxford-Pet dataset and STL-10 are used and will be downloaded automatically by the data loader.
-  **Output images:**
+      
+ -  **Output images:**
     * The checkpoint training and test images will be saved automatically.
 
 ## Results
