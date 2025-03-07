@@ -15,9 +15,9 @@ Bilevel learning plays a crucial role in machine learning, inverse problems, and
 **[Bilevel Learning with Inexact Stochastic Gradients](https://arxiv.org/pdf/2412.12049.pdf)**  
 
 - [Mohammad Sadegh Salehi](https://scholar.google.com/citations?user=bunZmJsAAAAJ&hl=en)  
-- [Subhadip Mukherjee](https://scholar.google.com/citations?user=subhadip)  
-- [Lindon Roberts](https://scholar.google.com/citations?user=lindon)  
-- [Matthias J. Ehrhardt](https://scholar.google.com/citations?user=matthias)  
+- [Subhadip Mukherjee](https://scholar.google.com/citations?user=a4UlE_MAAAAJ&hl=en)  
+- [Lindon Roberts](https://scholar.google.com/citations?user=s8Xj5BgAAAAJ&hl=en)  
+- [Matthias J. Ehrhardt](https://scholar.google.com/citations?user=dkbrSccAAAAJ&hl=en)  
 
 ---
 
@@ -27,11 +27,11 @@ This repository implements the proposed inexact stochastic bilevel optimization 
 
 - Learning data-adaptive regularizers  
 - Hyperparameter optimization  
-- Optimizing forward operators for imaging applications (denoising, deblurring)  
+- Optimizing forward operators for imaging applications (MRI)  
 
 ### **Key highlights of our approach:**  
 ✅ Inexact stochastic hypergradients for improved efficiency  
-✅ Strongly convex lower-level with a nonconvex upper-level sum-of-functions  
+✅ Theoretical connection to the state-of-the-art analysis of biased SGD
 ✅ Theoretical convergence guarantees  
 ✅ Faster training and better generalization than deterministic bilevel methods  
 
@@ -41,10 +41,54 @@ This repository implements the proposed inexact stochastic bilevel optimization 
 
 ### **1. Clone the repository**  
 ```bash
-git clone https://github.com/MohammadSadeghSalehi/Inexact-Bilevel-Optimization.git
-cd Inexact-Bilevel-Optimization
+git clone git@github.com:MohammadSadeghSalehi/SMAID.git
+cd SMAID
 ```
 
+2.  Install the necessary dependencies:
+
+    ```bash
+    pip install numpy matplotlib scikit-learn torch torchvision tqdm deepinv
+    ```
+    * Note: Ensure you have Python 3.6 or higher installed.
+## Usage
+
+ **Running the main script:**
+
+    ```bash
+    python train.py
+    ```
+    By default, the script uses the implicit function theorem-based bilevel optimization setting. 
+2.  **Modifying parameters:**
+
+    * The `train.py` script contains parameters that can be adjusted to control the optimization process. These include:
+        * `problem`: Denoising or Deblurring.
+        * `img_size_x` and `img_size_y`: The size of the input image.
+        * `channels`: Determines if the image is coloured or grayscale.
+        * `train_size`: The number of training images.
+        * `batch_size`: Size of mini-batches.
+        * `alpha`: Step size.
+        * `eps0`: Accuracy of the lower-level solver.
+        * `p`: Exponent of the decreasing factor of the accuracy (1/k^p).
+        * `q`: Exponent of the decreasing factor of the step size (1/k^q).
+
+    * Adjust these parameters within the `train.py` file to experiment with different settings.
+
+3.  **Input Images:**
+    * The Oxford-Pet dataset and STL-10 are used and will be downloaded automatically by the data loader.
+4.  **Output images:**
+    * The checkpoint training and test images will be saved automatically.
+
+## Results
+
+## Denoising training checkpoints
+<img src="Results/ADP.png" alt="Deblurred image result" width="1000">
+
+## Deblurring Test image
+
+## Perfomance comparison 
+<img src="Results/curve.png" alt="Deblurred image result" width="800">
+Comparison of Inexact Stochastic Gradient Descent (ISGD) with fixed and decreasing step size, with Method of Adaptive Inexact Descent (MAID)
 #
 **How to cite**
 
