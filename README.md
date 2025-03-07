@@ -9,6 +9,9 @@ Bilevel learning plays a crucial role in machine learning, inverse problems, and
 
 ---
 
+[![DOI](https://zenodo.org/badge/866248408.svg)](https://doi.org/10.5281/zenodo.14987053)
+
+
 ## **Paper Reference**  
 
 [![Bilevel Learning with Inexact Stochastic Gradients](https://img.shields.io/badge/arXiv-PDF-b31b1b)](https://arxiv.org/abs/2412.12049)  
