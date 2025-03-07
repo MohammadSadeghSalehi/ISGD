@@ -85,14 +85,15 @@ cd SMAID
 ## Results
 
 ## Denoising training checkpoints
-<img src="Result/training_cp.png" alt="Deblurred image result" width="1000">
+<img src="Result/training_cp.png" alt="Denoising result" width="800">
 
 ## Deblurring Test image
-<img src="Result/deblur.png" alt="Deblurred image result" width="1000">
+<img src="Result/deblur.png" alt="Deblurred result" width="800">
 
 ## Perfomance comparison 
 <img src="Result/performance.png" alt="Deblurred image result" width="800">
 Comparison of Inexact Stochastic Gradient Descent (ISGD) with fixed and decreasing step sizes to the Method of Adaptive Inexact Descent (MAID).
+
 #
 **How to cite**
 
